@@ -1,0 +1,11 @@
+# Config files
+config.json
+.env
+
+# Packages
+node_modules/
+
+# Miscellaneous
+.tmp/
+.vscode/
+.idea/
