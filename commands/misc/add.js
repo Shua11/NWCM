@@ -19,6 +19,7 @@ module.exports = {
 
         let reply = `${language(guild, 'THE_SUM_IS')} ${num1 + num2}`
 
+        console.log(message.channel)
         // botReply(message, reply)
         botSend(message.channel, reply)
     },

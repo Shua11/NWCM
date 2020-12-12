@@ -63,6 +63,7 @@ module.exports = (client, commandOptions) => {
         permissionError = 'You do not have permission to run this command.',
         requiredRoles = [],
         requiredChannels = '',
+        restrictedChannels = 'crafting',
         callback
     } = commandOptions
 
@@ -89,17 +90,29 @@ module.exports = (client, commandOptions) => {
 
         // Look through all commands
         for (const alias of commands) {
+
+            let inputCommand = content.toLowerCase(`${prefix}${alias.toLowerCase()}`)
             // Find first matching command
             if (content.toLowerCase().startsWith(`${prefix}${alias.toLowerCase()}`)) {
 
+                console.log(`Command recieved: ${inputCommand}`)
+
                 // Delete the user's message after seconds
-                // TODO: Throws and error when useing the clear channel command
-                try {
-                    message.delete({
-                        timeout: 1000 * 11
-                    })
-                } catch {
-                    console.log('User messgae no longer exists')
+                // Errors happen when clearing messages and then the message is not found when 
+                // the timed delete occurs. This fixes that.
+                const deleting = ['clearchannel', 'channelclear', 'cc']
+                if (!deleting.includes(alias)) {
+                    try {
+                        message.delete({
+                            timeout: 1000 * 11
+                        })
+                    } catch {
+                        console.log('User messgae no longer exists')
+                    }
+                }
+
+                if (restrictedChannels === channel.name && requiredChannels !== '') {
+                    console.log(`restricted channel`)
                 }
 
                 // Make sure the command is run in the correct channel
@@ -108,7 +121,7 @@ module.exports = (client, commandOptions) => {
                     const foundChannel = guild.channels.cache.find((channel) => {
                         return channel.name === requiredChannels
                     })
-                    botSend(message.chanel, `This command must be used in <#${foundChannel.id}>`)
+                    botSend(message.channel, `This command must be used in <#${foundChannel.id}>`)
                     // message.channel.send()
                     return
                 }

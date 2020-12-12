@@ -13,10 +13,10 @@ module.exports = {
 
         let embedValues = []
         let embedValuesOverflow = []
+        let embedFields = []
 
         // Get commands that the user has permissions to use
         const commands = loadCommands()
-        // console.log(commands)
 
         // Sort the commands by the command name value
         // This makes it easier to find a command in the list
@@ -34,12 +34,23 @@ module.exports = {
 
             // Remove commands that cannnot be ran in this channel
             let requiredChannel = command.requiredChannels
+            let restrictedChannel = command.restrictedChannels
+
+            // console.log(`Help: Required? ${requiredChannel}`)
 
             if (requiredChannel) {
                 if (requiredChannel !== channel.name) {
                     continue
                 }
             }
+
+            // console.log(`Help: Restricted? ${restrictedChannel}`)
+
+            // if (restrictedChannel) {
+            //     if (restrictedChannel == channel.name) {
+            //         continue
+            //     }
+            // }
 
             // Remove commands the the user doesn't have permission for
             let permissions = command.permissions
@@ -76,29 +87,37 @@ module.exports = {
                 embedValuesOverflow.push(line)
             }
 
-            if (embedValuesOverflow.length === 0) {
-                embedValuesOverflow.push(`need more perms`)
-            }
+            // if (embedValuesOverflow.length === 0) {
+            //     embedValuesOverflow.push(`need more perms`)
+            // }
         }
+
+
+        // Fields can only have up to 1024 characters
+        // Have to dynamically add them because fields also cannot be empty
+        embedFields = [{
+            name: 'Commands:',
+            value: embedValues
+        }]
+
+        if (embedValuesOverflow.length > 0) {
+            embedFields.push({
+                name: 'Commands continued:',
+                value: embedValuesOverflow
+            })
+        }
+
         // Create the embed
         const embed = new Discord.MessageEmbed()
             .setTitle('Help Menu')
             .setDescription('Specific commands available for this channel and your current permissions level.')
             .setFooter('New World Company Manager', message.guild.iconURL())
             .setColor('#000')
-            .addFields(
-                {
-                    name: 'Commands:',
-                    value: embedValues
-                },
-                {
-                    name: 'Commands continued:',
-                    value: embedValuesOverflow
-                })
+            .addFields(embedFields)
         // Send the help embed to the user
         message.channel.send(embed).then((message) => {
             message.delete({
-                timeout: 1000 * 60
+                timeout: 1000 * 20
             })
         })
     },
